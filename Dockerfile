@@ -1,15 +1,13 @@
-FROM python:3.11-slim
+FROM python:3.11-bullseye
 
-# Installer les dépendances système requises par WeasyPrint
 RUN apt-get update && apt-get install -y \
-    libpango-1.0-0 \
-    libpangoft2-1.0-0 \
-    libpangocairo-1.0-0 \
-    libcairo2 \
-    libgdk-pixbuf2.0-0 \
+    libpango1.0-dev \
+    libcairo2-dev \
+    libgdk-pixbuf2.0-dev \
     libffi-dev \
     shared-mime-info \
     fonts-liberation \
+    gcc \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
