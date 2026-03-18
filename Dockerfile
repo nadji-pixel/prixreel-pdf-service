@@ -1,20 +1,9 @@
-FROM python:3.11-bullseye
-
-RUN apt-get update && apt-get install -y \
-    libpango1.0-dev \
-    libcairo2-dev \
-    libgdk-pixbuf2.0-dev \
-    libffi-dev \
-    shared-mime-info \
-    fonts-liberation \
-    gcc \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+FROM ghcr.io/weasyprint/weasyprint:latest
 
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir flask gunicorn
 
 COPY app.py .
 
