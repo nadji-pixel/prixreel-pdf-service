@@ -9,6 +9,30 @@ app = Flask(__name__)
 def ping():
     return jsonify({"status": "alive"})
 
+@app.route('/version', methods=['GET'])
+def version():
+    try:
+        import weasyprint
+        import cairo
+        return jsonify({
+            "weasyprint": weasyprint.__version__,
+            "cairo": cairo.cairo_version_string()
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+@app.route('/test', methods=['GET'])
+def test():
+    try:
+        html = "<html><body><h1>Test PDF</h1><p>WeasyPrint fonctionne.</p></body></html>"
+        pdf_bytes = HTML(string=html).write_pdf()
+        buf = io.BytesIO(pdf_bytes)
+        buf.seek(0)
+        return send_file(buf, mimetype='application/pdf')
+    except Exception as e:
+        import traceback
+        return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
+
 @app.route('/pdf', methods=['POST'])
 def generate_pdf():
     try:
@@ -17,11 +41,8 @@ def generate_pdf():
             return jsonify({"error": "Missing 'html' field"}), 400
 
         html_content = data['html']
-
-        # Générer le PDF en mémoire
         pdf_bytes = HTML(string=html_content).write_pdf()
 
-        # Retourner le PDF directement
         buf = io.BytesIO(pdf_bytes)
         buf.seek(0)
         return send_file(
@@ -32,7 +53,8 @@ def generate_pdf():
         )
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        import traceback
+        return jsonify({"error": str(e), "trace": traceback.format_exc()[-500:]}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
